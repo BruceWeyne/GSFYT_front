@@ -1,6 +1,9 @@
 import React from "react"
 import { deleteTodo } from "../lib/api/todos"
 import { Todo } from "../interfaces/index"
+import { Button } from 'react-bootstrap';
+
+import "../stylesheets/custom.css";
 
 interface TodoItemProps {
   todo: Todo
@@ -28,7 +31,8 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, setTodos }) => {
       <span>{todo.title}</span>
       <span></span>
       <span>
-        <button onClick={() => handleDeleteTodo(todo.id || 0)}>Delete</button>
+        {/* <button onClick={() => handleDeleteTodo(todo.id || 0)}>Delete</button> */}
+        <Button variant="delete" onClick={() => handleDeleteTodo(todo.id || 0)}>Delete</Button>
       </span>
     </li>
   )
