@@ -1,5 +1,5 @@
-import client from "./client";
-import { Todo } from "../../interfaces/index";
+import client from "./client"
+import { Todo } from "../../interfaces/index"
 
 // todo一覧を表示
 export const getTodos = () => {

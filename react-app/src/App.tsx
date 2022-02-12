@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react"
 import { TodoList } from "./components/TodoList"
 import { TodoForm } from "./components/TodoForm"
+import { VideoForm } from "./components/VideoForm"
 
 import { getTodos } from "./lib/api/todos"
-import { Todo } from "./interfaces/index"
+import { Todo, Url } from "./interfaces/index"
 
 const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([])
+  const [urls, setUrls] = useState<Url[]>([])
 
   const handleGetTodos = async () => {
     try {
@@ -24,7 +26,7 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    handleGetTodos()
+    // handleGetTodos()
   }, [])
 
   // useEffect(() => {
@@ -37,9 +39,11 @@ const App: React.FC = () => {
 
   return (
     <>
-      <h1>Todo App</h1>
-      <TodoForm todos={todos} setTodos={setTodos} />
-      <TodoList todos={todos} setTodos={setTodos} />
+      <h1>YouTube Video Subtitle Downloader</h1>
+      <p>Send YouTube Video URL to get its subtitle.</p>
+      <VideoForm />
+      {/* <TodoForm todos={todos} setTodos={setTodos} /> */}
+      {/* <TodoList todos={todos} setTodos={setTodos} /> */}
     </>
   )
 }
