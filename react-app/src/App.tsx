@@ -1,50 +1,96 @@
-import React, { useState, useEffect } from "react"
-import { TodoList } from "./components/TodoList"
-import { TodoForm } from "./components/TodoForm"
-import { VideoForm } from "./components/VideoForm"
+import React, { useState, useEffect, createContext } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 
-import { getTodos } from "./lib/api/todos"
-import { Todo, Url } from "./interfaces/index"
+import CommonLayout from './components/layouts/CommonLayout'
+import Home from "./components/pages/Home"
+import SignUp from "./components/pages/SignUp"
+import SignIn from "./components/pages/SignIn"
+
+import { getCurrentUser } from "./lib/api/auth"
+import { User } from "./interfaces/index"
+
+// グローバルで扱う変数・関数
+export const AuthContext = createContext({} as {
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  isSignedIn: boolean
+  setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>
+  currentUser: User | undefined
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | undefined>>
+})
 
 const App: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>([])
-  const [urls, setUrls] = useState<Url[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false)
+  const [currentUser, setCurrentUser] = useState<User | undefined>()
 
-  const handleGetTodos = async () => {
+  // 認証済みのユーザーがいるかどうかをチェック
+  // 確認できた場合はそのユーザーの情報を取得
+  const handleGetCurrentUser = async () => {
     try {
-      const response = await getTodos()
-      console.log('getTodos', response)
+      const res = await getCurrentUser()
 
-      if (response?.status === 200) {
-        setTodos(response.data.todos)
+      if (res?.data.isLogin === true) {
+        setIsSignedIn(true)
+        setCurrentUser(res?.data.data)
+
+        console.log(res?.data.data);
       } else {
-        console.log(response.data.message)
+        console.log("No current user");
+        
       }
-    } catch (err) {
-      console.log(err)
+    } catch (error) {
+      console.log(error);
     }
+
+    setLoading(false)
   }
 
   useEffect(() => {
-    // handleGetTodos()
-  }, [])
+    handleGetCurrentUser()
+  }, [setCurrentUser])
 
-  // useEffect(() => {
-  //   let abortCtrl = new AbortController()
-  //   handleGetTodos()
-  //   return () => {
-  //     abortCtrl.abort()
+
+  // ユーザーが認証済みかどうかでルーティングを決定
+  // 未認証だった場合は「/signin」ページに促す
+  // const Private = ({ children }: { children: React.ReactElement }) => {
+  //   if (!loading) {
+  //     if (isSignedIn) {
+  //       return children
+  //     } else {
+  //       // return <Redirect to="/signin" />
+  //       return <Navigate to="/signin" />
+  //     }
+  //   } else {
+  //     return <></>
   //   }
-  // }, [])
+  // }
+  const Private = ({ children }: { children: React.ReactElement }) => {
+    if (!loading) {
+      if (isSignedIn) {
+        return children
+      } else {
+        // return <Redirect to="/signin" />
+        return <Navigate to="/signin" />
+      }
+    } else {
+      return <></>
+    }
+  }
 
   return (
-    <>
-      <h1>YouTube Video Subtitle Downloader</h1>
-      <p>Send YouTube Video URL to get its subtitle.</p>
-      <VideoForm />
-      {/* <TodoForm todos={todos} setTodos={setTodos} /> */}
-      {/* <TodoList todos={todos} setTodos={setTodos} /> */}
-    </>
+    <Router>
+      <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser }}>
+        <CommonLayout>
+          <Routes>
+            {/* <Route exact path="/signup" component={SignUp} /> */}
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/" element={<Private children={<Home />} />} />
+          </Routes>
+        </CommonLayout>
+      </AuthContext.Provider>
+    </Router>
   )
 }
 
